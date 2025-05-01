@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexiusAI - Your Ultimate AI Assistant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #000;
+      color: #e2e8f0;
+      overflow-x: hidden;
+      position: relative;
+    }
+    #particles-js {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+    .header {
+      background: #1a1a1a;
+      padding: 1.5rem 2rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header h1 {
+      font-size: 1.8rem;
+      color: #60a5fa;
+      animation: fadeIn 1s ease-in;
+    }
+    .header nav {
+      display: flex;
+      gap: 1rem;
+    }
+    .header nav a {
+      text-decoration: none;
+      color: #e2e8f0;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      transition: color 0.3s;
+    }
+    .header nav a:hover {
+      color: #60a5fa;
+    }
+    .main {
+      max-width: 900px;
+      margin: 3rem auto;
+      padding: 0 1.5rem;
+      text-align: center;
+    }
+    .main h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: #e2e8f0;
+      animation: slideInUp 0.5s ease;
+    }
+    .main p {
+      font-size: 1.2rem;
+      color: #a0aec0;
+      margin-bottom: 2rem;
+    }
+    .input-container {
+      display: flex;
+      max-width: 700px;
+      margin: 0 auto;
+      background: #1a1a1a;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      transition: transform 0.3s;
+    }
+    .input-container:hover {
+      transform: translateY(-2px);
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 1.2rem;
+      border: none;
+      font-size: 1.1rem;
+      background: transparent;
+      outline: none;
+      color: #e2e8f0;
+    }
+    input[type="text"]::placeholder {
+      color: #718096;
+    }
+    .input-container button {
+      padding: 1.2rem 2rem;
+      background: linear-gradient(to right, #60a5fa, #3b82f6);
+      color: #fff;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .input-container button:hover {
+      background: linear-gradient(to right, #3b82f6, #2563eb);
+    }
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin: 2rem 0;
+      overflow-x: auto;
+      justify-content: center;
+    }
+    .tab {
+      padding: 0.8rem 1.5rem;
+      background: #2d3748;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      color: #e2e8f0;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .tab.active {
+      background: #60a5fa;
+      color: #fff;
+      transform: translateY(-2px);
+    }
+    .tab:hover {
+      background: #4a5568;
+    }
+    .chat-box {
+      background: #1a1a1a;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      padding: 1.5rem;
+      min-height: 400px;
+      max-height: 600px;
+      overflow-y: auto;
+      margin-bottom: 2rem;
+    }
+    .message {
+      margin: 1rem 0;
+      padding: 1rem;
+      border-radius: 8px;
+      animation: slideInLeft 0.3s ease;
+    }
+    .user-message {
+      background: linear-gradient(to right, #60a5fa, #3b82f6);
+      margin-left: 20%;
+      color: #fff;
+    }
+    .bot-message {
+      background: #2d3748;
+      margin-right: 20%;
+      color: #e2e8f0;
+    }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -300px;
+      width: 300px;
+      height: 100%;
+      background: #1a1a1a;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.5);
+      padding: 2rem;
+      transition: left 0.3s;
+      z-index: 20;
+    }
+    .sidebar.open {
+      left: 0;
+    }
+    .sidebar h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: #60a5fa;
+    }
+    .sidebar ul {
+      list-style: none;
+    }
+    .sidebar li {
+      padding: 0.5rem 0;
+      cursor: pointer;
+      color: #e2e8f0;
+      transition: color 0.3s;
+    }
+    .sidebar li:hover {
+      color: #60a5fa;
+    }
+    .fab {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(to right, #f87171, #ef4444);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      cursor: pointer;
+      font-size: 1.8rem;
+      transition: transform 0.3s;
+    }
+    .fab:hover {
+      transform: rotate(360deg);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @media (max-width: 768px) {
+      .main h2 {
+        font-size: 2rem;
+      }
+      .input-container {
+        flex-direction: column;
+        max-width: 100%;
+      }
+      input[type="text"] {
+        width: 100%;
+      }
+      .input-container button {
+        width: 100%;
+        border-radius: 0 0 12px 12px;
+      }
+      .chat-box {
+        min-height: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="particles-js"></div>
+  <header class="header">
+    <h1>NexiusAI</h1>
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#docs">Docs</a>
+      <a href="#about">About</a>
+    </nav>
+  </header>
+  <main class="main">
+    <h2>Ask NexiusAI Anything</h2>
+    <p>Get help with website development, Roblox/Luau, image creation, or any topic you need!</p>
+    <div class="input-container">
+      <input type="text" id="userInput" placeholder="Ask about websites, Roblox, or anything...">
+      <button onclick="sendMessage()">Ask</button>
+    </div>
+    <div class="tabs" id="chatTabs">
+      <div class="tab active" data-tab="0">New Chat</div>
+    </div>
+    <div class="chat-box" id="chatBox">
+      <div class="message bot-message">Welcome to NexiusAI! I'm here to assist with website development, Roblox/Luau scripting, image creation, or anything else you need. Type your question above to start a new chat or switch tabs to view saved chats.</div>
+    </div>
+  </main>
+  <div class="fab" onclick="toggleSidebar()">+</div>
+  <div class="sidebar" id="sidebar">
+    <h2>Saved Chats</h2>
+    <ul id="savedChats"></ul>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <script>
+    // Initialize particles.js with effects inspired by get-nexius.vercel.app
+    particlesJS('particles-js', {
+      particles: {
+        number: { value: 150, density: { enable: true, value_area: 800 } },
+        color: { value: ['#60a5fa', '#f87171', '#34d399'] },
+        shape: { type: 'circle', stroke: { width: 0, color: '#000000' } },
+        opacity: { value: 0.8, random: true, anim: { enable: true, speed: 1.5, opacity_min: 0.4 } },
+        size: { value: 6, random: true, anim: { enable: true, speed: 3, size_min: 1 } },
+        line_linked: { enable: true, distance: 120, color: '#60a5fa', opacity: 0.5, width: 1.5 },
+        move: { enable: true, speed: 5, direction: 'none', random: true, straight: false, out_mode: 'out', bounce: false }
+      },
+      interactivity: {
+        detect_on: 'canvas',
+        events: { onhover: { enable: true, mode: 'grab' }, onclick: { enable: true, mode: 'push' }, resize: true },
+        modes: { grab: { distance: 180, line_linked: { opacity: 0.7 } }, push: { particles_nb: 6 } }
+      },
+      retina_detect: true
+    });
+
+    const API_KEY = 'xai-3xnFFQxm0RSuMkxP6DVSICNwhBKXHY33scI2OP9AI84lqXasg6IcwMFa1HCkcCO511mNyHZqZPg2zRrd';
+    const API_URL = 'https://api.x.ai/v1/chat/completions';
+
+    let chats = [{ id: 0, messages: [], title: 'New Chat' }];
+    let currentChatId = 0;
+
+    function renderTabs() {
+      const tabsContainer = document.getElementById('chatTabs');
+      tabsContainer.innerHTML = '';
+      chats.forEach(chat => {
+        const tab = document.createElement('div');
+        tab.className = `tab ${chat.id === currentChatId ? 'active' : ''}`;
+        tab.dataset.tab = chat.id;
+        tab.textContent = chat.title;
+        tab.onclick = () => switchChat(chat.id);
+        tabsContainer.appendChild(tab);
+      });
+    }
+
+    function renderChat() {
+      const chatBox = document.getElementById('chatBox');
+      chatBox.innerHTML = '';
+      const currentChat = chats.find(c => c.id === currentChatId);
+      currentChat.messages.forEach(msg => {
+        const message = document.createElement('div');
+        message.className = `message ${msg.role}-message`;
+        message.textContent = msg.content;
+        chatBox.appendChild(message);
+      });
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function switchChat(id) {
+      currentChatId = id;
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelector(`.tab[data-tab="${id}"]`).classList.add('active');
+      renderChat();
+    }
+
+    function saveChat() {
+      const currentChat = chats.find(c => c.id === currentChatId);
+      if (currentChat.messages.length === 0) return;
+      const savedChats = document.getElementById('savedChats');
+      const li = document.createElement('li');
+      li.textContent = currentChat.title;
+      li.onclick = () => switchChat(currentChat.id);
+      savedChats.appendChild(li);
+    }
+
+    async function sendMessage() {
+      const userInput = document.getElementById('userInput').value;
+      if (!userInput.trim()) return;
+
+      // Add user message to current chat
+      const currentChat = chats.find(c => c.id === currentChatId);
+      currentChat.messages.push({ role: 'user', content: userInput });
+      if (currentChat.messages.length === 1) {
+        currentChat.title = userInput.slice(0, 20) + (userInput.length > 20 ? '...' : '');
+      }
+      renderTabs();
+      renderChat();
+
+      // Clear input
+      document.getElementById('userInput').value = '';
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${API_KEY}`
+          },
+          body: JSON.stringify({
+            messages: [
+              {
+                role: 'system',
+                content: 'You are NexiusAI, a highly advanced AI assistant specializing in website development (HTML, CSS, JS), Roblox/Luau scripting, image creation, and general knowledge. Provide clear, practical, and modern solutions with code snippets when relevant. Be creative, friendly, and responsive, assisting with any user request, including web development, Roblox game scripting, or other tasks. Offer concise yet comprehensive answers inspired by Perplexity.ai’s style.'
+              },
+              ...currentChat.messages
+            ],
+            model: 'grok-3-latest',
+            stream: false,
+            temperature: 0
+          })
+        });
+
+        const data = await response.json();
+        currentChat.messages.push({ role: 'bot', content: data.choices[0].message.content });
+        renderChat();
+      } catch (error) {
+        currentChat.messages.push({ role: 'bot', content: 'Oops, something went wrong. Please try again!' });
+        renderChat();
+      }
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('open');
+    }
+
+    function newChat() {
+      const newId = chats.length;
+      chats.push({ id: newId, messages: [], title: `Chat ${newId + 1}` });
+      switchChat(newId);
+      saveChat();
+      toggleSidebar();
+    }
+
+    // Initialize
+    renderTabs();
+    renderChat();
+
+    // Event listeners
+    document.getElementById('userInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+    document.getElementById('sidebar').addEventListener('click', (e) => {
+      if (e.target.tagName === 'LI') toggleSidebar();
+    });
+    document.querySelector('.fab').addEventListener('click', newChat);
+  </script>
+</body>
+</html>
