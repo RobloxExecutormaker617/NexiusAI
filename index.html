@@ -294,8 +294,8 @@
       retina_detect: true
     });
 
-    const API_KEY = 'xai-3xnFFQxm0RSuMkxP6DVSICNwhBKXHY33scI2OP9AI84lqXasg6IcwMFa1HCkcCO511mNyHZqZPg2zRrd';
-    const API_URL = 'https://api.x.ai/v1/chat/completions';
+    const API_KEY = 'AIzaSyDm3X3tI8J7p8o7I3DraXuR7LC4iilXTQc';
+    const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
     let chats = [{ id: 0, messages: [], title: 'New Chat' }];
     let currentChatId = 0;
@@ -360,31 +360,44 @@
       document.getElementById('userInput').value = '';
 
       try {
-        const response = await fetch(API_URL, {
+        const systemPrompt = 'You are NexiusAI, a highly advanced AI assistant specializing in website development (HTML, CSS, JS), Roblox/Luau scripting, image creation, and general knowledge. Provide clear, practical, and modern solutions with code snippets when relevant. Be creative, friendly, and responsive, assisting with any user request, including web development, Roblox game scripting, or other tasks. Offer concise yet comprehensive answers inspired by Perplexity.ai’s style.';
+        
+        const response = await fetch(`${API_URL}?key=${API_KEY}`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${API_KEY}`
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            messages: [
-              {
-                role: 'system',
-                content: 'You are NexiusAI, a highly advanced AI assistant specializing in website development (HTML, CSS, JS), Roblox/Luau scripting, image creation, and general knowledge. Provide clear, practical, and modern solutions with code snippets when relevant. Be creative, friendly, and responsive, assisting with any user request, including web development, Roblox game scripting, or other tasks. Offer concise yet comprehensive answers inspired by Perplexity.ai’s style.'
-              },
-              ...currentChat.messages
-            ],
-            model: 'grok-3-latest',
-            stream: false,
-            temperature: 0
+            contents: [
+              { parts: [{ text: systemPrompt }] },
+              { parts: [{ text: userInput }] }
+            ]
           })
         });
 
-        const data = await response.json();
-        currentChat.messages.push({ role: 'bot', content: data.choices[0].message.content });
+        const text = await response.text();
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}, Message: ${text}`);
+        }
+
+        const data = JSON.parse(text);
+        const botResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response content available';
+        if (!botResponse) {
+          throw new Error('Invalid API response: No valid content found');
+        }
+
+        currentChat.messages.push({ role: 'bot', content: botResponse });
         renderChat();
       } catch (error) {
-        currentChat.messages.push({ role: 'bot', content: 'Oops, something went wrong. Please try again!' });
+        console.error('API Error Details:', {
+          message: error.message,
+          stack: error.stack,
+          response: error.response || 'No response available'
+        });
+        currentChat.messages.push({ 
+          role: 'bot', 
+          content: `Error: ${error.message}. Please check the API key, network connection, or try again later.` 
+        });
         renderChat();
       }
     }
@@ -403,8 +416,10 @@
     }
 
     // Initialize
-    renderTabs();
-    renderChat();
+    document.addEventListener('DOMContentLoaded', () => {
+      renderTabs();
+      renderChat();
+    });
 
     // Event listeners
     document.getElementById('userInput').addEventListener('keypress', (e) => {
